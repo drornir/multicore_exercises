@@ -28,10 +28,10 @@ public class Ex1q7 {
             threads[i] = new Thread() {
                 public void run() {
                     for (int i = 0; i < ITERATIONS; i++) {
-                        int temp = cnt;
-                        temp++;
                         lock.lock();
                         try { // just for good practice
+                            int temp = cnt;
+                            temp++;
                             cnt = temp;
                         } finally {
                             lock.unlock();
