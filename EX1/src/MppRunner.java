@@ -12,10 +12,12 @@ public class MppRunner {
         for (String[] input : inputs) {
             System.out.print("Q6: ");
             Ex1q6.main(input);
-        }for (String[] input : inputs) {
+        }
+        for (String[] input : inputs) {
             System.out.print("Q7: ");
             Ex1q7.main(input);
-        }for (String[] input : inputs) {
+        }
+        for (String[] input : inputs) {
             System.out.print("Q8: ");
             Ex1q8.main(input);
         }
