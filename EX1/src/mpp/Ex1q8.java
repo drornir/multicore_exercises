@@ -34,7 +34,7 @@ public class Ex1q8 {
         }
 
         for (Thread t : threads) {
-            t.run();
+            t.start();
         }
 
         try {
