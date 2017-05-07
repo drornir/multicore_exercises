@@ -1,0 +1,32 @@
+Picked up _JAVA_OPTIONS: -Xmx1g
+Q6: Time: 12,	 Counter: 1000000
+
+Q6: Time: 174,	 Counter: 2456123
+
+Q6: Time: 283,	 Counter: 4015418
+
+Q6: Time: 506,	 Counter: 5842232
+
+Q6: Time: 998,	 Counter: 7686022
+
+Q7: Time: 36,	 Counter: 1000000
+
+Q7: Time: 270,	 Counter: 5000000
+
+Q7: Time: 360,	 Counter: 13000000
+
+Q7: Time: 621,	 Counter: 29000000
+
+Q7: Time: 1352,	 Counter: 61000000
+
+Q8: Time: 14,	 Counter: 1000000
+
+Q8: Time: 60,	 Counter: 5000000
+
+Q8: Time: 120,	 Counter: 13000000
+
+Q8: Time: 251,	 Counter: 29000000
+
+Q8: Time: 509,	 Counter: 61000000
+
+Multicore execution finished

@@ -4,7 +4,7 @@ package mpp;
  * Created by uriamor on 04/05/2017.
  */
 public class Ex1q6 {
-    static int cnt = 0;
+    volatile static int cnt = 0;
 
     public static void main(String[] args) {
         final int ITERATIONS = 1000000;
