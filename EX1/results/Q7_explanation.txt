@@ -1,0 +1,3 @@
+First, we see that the counter was locked appropriately: its value is the correct value as expected, in comparison to the previous question.
+Now we look at the graph and see that it appears to have non-linear growth. The slowdown is because threads must wait for the lock to be unlocked.
+This result was expected because of Amdahl’s Law: Most of our program is not parallelized.
