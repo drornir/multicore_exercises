@@ -23,13 +23,13 @@ public class Ex2q7 {
     public class UniversalConstruction<T> {
         private volatile OpNode<T>[] head;
         private volatile OpNode<T>[] current;
-        private volatile OpNode<T> tail = new OpNode<>(null);
         private volatile T[] seqObject;
 
         public UniversalConstruction(int numThreads) {
-            tail.seq = 1;
             this.head = (OpNode<T>[]) new OpNode[numThreads];
             this.current = (OpNode<T>[]) new OpNode[numThreads];
+            OpNode<T> tail = new OpNode<>(null);
+            tail.seq = 1;
             for (int i = 0; i < numThreads; i++) {
                 this.head[i] = tail;
                 this.current[i] = tail;
@@ -82,7 +82,7 @@ public class Ex2q7 {
             return (int) Thread.currentThread().getId() & this.head.length;
         }
 
-        public class OpNode<T> {
+        private class OpNode<T> {
             public volatile Operation<T> operation;
             public volatile Consensus<OpNode<T>> decideNext = new Consensus<>();
             public volatile OpNode<T> next;
@@ -94,6 +94,52 @@ public class Ex2q7 {
         }
     }
 
+    interface MyQueue {
+        void enqueue(Integer value);
+        Integer dequeue();
+    }
+
+    public class SerQueue implements MyQueue {
+        private Node head,tail;
+
+        public SerQueue() {
+            this.head = this.tail = new Node(null);
+        }
+
+        @Override
+        public void enqueue(Integer value) {
+            this.head.next = new Node(value);
+            this.head = this.head.next;
+        }
+
+        @Override
+        public Integer dequeue() {
+            this.tail = this.tail.next;
+            return this.tail.value;
+        }
+
+        private class Node{
+            final public Integer value;
+            public Node next = null;
+
+            public Node(Integer value) {
+                this.value = value;
+            }
+        }
+    }
+
+    public class LockFreeQueue implements MyQueue{
+        UniversalConstruction uc;
+        @Override
+        public void enqueue(Integer value) {
+
+        }
+
+        @Override
+        public Integer dequeue() {
+            return null;
+        }
+    }
     public static void main(String[] args) {
 
     }
