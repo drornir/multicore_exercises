@@ -32,7 +32,8 @@
 \part*{Intro to Multiprocessor Programming}
 
 \section*{HomeWork1}
-Dror Nir and Uria Mor
+Dror Nir 2030572989\newline
+Uria Mor 200672954
 
 \section*{Q1}
 
@@ -187,17 +188,24 @@ to the same register before entering CS. By the definition of MRSW, this is not 
 \graphicspath{{/Users/uriamor/Documents/TAU/mpp/multicore_exercises/EX1/results/}}
 \section*{Q6}
 \begin{figure}[h]
-	\includegraphics[width=20cm]{Q6.png}
+	\includegraphics[width=20cm]{Q6_second.png}
 \end{figure}
 \section*{Q7}
 \begin{figure}[h]
 	\includegraphics[width=20cm]{Q7.png}
 \end{figure}
+First, we see that the counter was locked appropriately: its value is the correct value as expected, in comparison to the previous question.
+Now we look at the graph and see that it appears to have non-linear growth. The slowdown is because threads must wait for the lock to be unlocked.
+This result was expected because of Amdahl?s Law: Most of our program is not parallelized
 \pagebreak
 \section*{Q8}
 \begin{figure}[h]
-	\includegraphics[width=20cm]{Q8.png}
+	\includegraphics[width=20cm]{Q8_second.png}
 \end{figure}
+\begin{figure}[h]
+	\includegraphics[width=20cm]{Q8_2_second.png}
+\end{figure}
+On the bottom right plot, question 7's line is masked by question 8's line since the counter values are the same.
 
 
 \end{enumerate}
