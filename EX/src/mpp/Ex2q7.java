@@ -21,9 +21,6 @@ public class Ex2q7 {
     public interface Operation<T> {
         Integer apply(T ds);
     }
-    // public class QueueEnq implements Operation<MyQueue>
-    // public class QueueDeq implements Operation<MyQueue>
-    // etc.
 
     public static class UniversalConstruction<T> {
         private volatile OpNode<T>[] head;
@@ -100,6 +97,7 @@ public class Ex2q7 {
     }
 
     interface MyQueue {
+        void initInsideThread();
         void enqueue(Integer value);
 
         Integer dequeue();
@@ -110,6 +108,12 @@ public class Ex2q7 {
 
         public SerQueue() {
             this.head = this.tail = new Node(null);
+        }
+
+
+        @Override
+        public void initInsideThread() {
+
         }
 
         @Override
@@ -126,7 +130,6 @@ public class Ex2q7 {
             } else {
                 return null;
             }
-
         }
 
         private class Node {
@@ -144,6 +147,11 @@ public class Ex2q7 {
 
         public LockFreeQueue(int numThreads) {
             uc = new UniversalConstruction<>(numThreads);
+        }
+
+        @Override
+        public void initInsideThread() {
+            uc.init(new SerQueue());
         }
 
         @Override
@@ -183,6 +191,11 @@ public class Ex2q7 {
 
         private final ReentrantLock lock = new ReentrantLock();
         private final SerQueue q = new SerQueue();
+
+        @Override
+        public void initInsideThread() {
+
+        }
 
         @Override
         public void enqueue(Integer value) {
@@ -227,7 +240,7 @@ public class Ex2q7 {
         }
         final OpsCounterThread[] threads = new OpsCounterThread[threadsAmount];
         for (int i = 0; i < threads.length; i++) {
-            threads[i] = new OpsCounterThread(runThreads,queue);
+            threads[i] = new OpsCounterThread(runThreads, queue);
         }
         for (Thread thread : threads) {
             thread.start();
@@ -239,19 +252,17 @@ public class Ex2q7 {
                 thread.join();
             }
         } catch (InterruptedException e) {
-            System.err.println("Interrupted: ");
-            e.printStackTrace();
-            exit(1);
+            throw new Error("Interrupted", e);
         }
         double throughput = 0;
         for (OpsCounterThread thread : threads) {
-            throughput += (thread.getOpsCount()/EXECUTION_TIME_SECS);
+            throughput += (thread.getOpsCount() / EXECUTION_TIME_SECS);
         }
         System.out.println(throughput);
     }
 
-    static class OpsCounterThread extends Thread{
-        private long opsCount=0;
+    static class OpsCounterThread extends Thread {
+        private long opsCount = 0;
         final boolean[] runThreads;
         final MyQueue queue;
 
@@ -262,6 +273,7 @@ public class Ex2q7 {
 
         @Override
         public void run() {
+            this.queue.initInsideThread();
             Random random = new Random();
             while (runThreads[0]) {
                 if (this.opsCount % 2 == 0) {

@@ -1,6 +1,4 @@
-import mpp.Ex1q6;
-import mpp.Ex1q7;
-import mpp.Ex1q8;
+import mpp.Ex2q7;
 
 /**
  * Created by Dror Nir on 05/05/2017.
@@ -17,7 +15,7 @@ public class MppRunner {
                 String[] impl = IMPLEMENTATION[j];
                 for (int k = 0; k < 10; k++) {
                     System.out.print(threads[0] + "," + impl[0] + "," + k + ",");
-                    Ex1q7.main(new String[]{threads[0], impl[0]});
+                    Ex2q7.main(new String[]{threads[0], impl[0]});
                 }
 
             }
