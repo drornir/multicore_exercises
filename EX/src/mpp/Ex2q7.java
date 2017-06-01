@@ -1,9 +1,14 @@
 package mpp;
 
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantLock;
+
+import static java.lang.Integer.parseInt;
+import static java.lang.System.exit;
 
 public class Ex2q7 {
-    public class Consensus<T> {
+    public static class Consensus<T> {
         // the *only* field in this class
         private AtomicReference<T> reference = new AtomicReference<>(null);
 
@@ -14,13 +19,13 @@ public class Ex2q7 {
     }
 
     public interface Operation<T> {
-        Object apply(T ds);
+        Integer apply(T ds);
     }
     // public class QueueEnq implements Operation<MyQueue>
     // public class QueueDeq implements Operation<MyQueue>
     // etc.
 
-    public class UniversalConstruction<T> {
+    public static class UniversalConstruction<T> {
         private volatile OpNode<T>[] head;
         private volatile OpNode<T>[] current;
         private volatile T[] seqObject;
@@ -42,16 +47,16 @@ public class Ex2q7 {
             this.seqObject[getThreadId()] = dsEmpty;
         }
 
-        public Object execute(Operation<T> op) {
+        public Integer execute(Operation<T> op) {
             OpNode<T> prefer = new OpNode<>(op);
             insertOpNode(prefer);
             return advanceSeqObject(prefer);
         }
 
 
-        private Object advanceSeqObject(OpNode<T> prefer) {
+        private Integer advanceSeqObject(OpNode<T> prefer) {
             int threadId = getThreadId();
-            Object returnVal = null;
+            Integer returnVal = null;
             while (this.current[threadId] != prefer) {
                 this.current[threadId] = this.current[threadId].next;
                 returnVal = this.current[threadId].operation.apply(this.seqObject[threadId]);
@@ -96,11 +101,12 @@ public class Ex2q7 {
 
     interface MyQueue {
         void enqueue(Integer value);
+
         Integer dequeue();
     }
 
-    public class SerQueue implements MyQueue {
-        private Node head,tail;
+    public static class SerQueue implements MyQueue {
+        private Node head, tail;
 
         public SerQueue() {
             this.head = this.tail = new Node(null);
@@ -114,11 +120,16 @@ public class Ex2q7 {
 
         @Override
         public Integer dequeue() {
-            this.tail = this.tail.next;
-            return this.tail.value;
+            if (this.tail.next != null) {
+                this.tail = this.tail.next;
+                return this.tail.value;
+            } else {
+                return null;
+            }
+
         }
 
-        private class Node{
+        private class Node {
             final public Integer value;
             public Node next = null;
 
@@ -128,19 +139,143 @@ public class Ex2q7 {
         }
     }
 
-    public class LockFreeQueue implements MyQueue{
-        UniversalConstruction uc;
+    public static class LockFreeQueue implements MyQueue {
+        private final UniversalConstruction<SerQueue> uc;
+
+        public LockFreeQueue(int numThreads) {
+            uc = new UniversalConstruction<>(numThreads);
+        }
+
         @Override
         public void enqueue(Integer value) {
+            uc.execute(new Enqueue(value));
+        }
 
+        private class Enqueue implements Operation<SerQueue> {
+            final Integer insertionValue;
+
+            public Enqueue(Integer insertionValue) {
+                this.insertionValue = insertionValue;
+            }
+
+            @Override
+            public Integer apply(SerQueue ds) {
+                ds.enqueue(this.insertionValue);
+                return null;
+            }
         }
 
         @Override
         public Integer dequeue() {
-            return null;
+            return uc.execute(new Dequeue());
+        }
+
+        private class Dequeue implements Operation<SerQueue> {
+
+            @Override
+            public Integer apply(SerQueue ds) {
+                return ds.dequeue();
+            }
         }
     }
-    public static void main(String[] args) {
 
+    public static class DeadlockFreeQueue implements MyQueue {
+
+        private final ReentrantLock lock = new ReentrantLock();
+        private final SerQueue q = new SerQueue();
+
+        @Override
+        public void enqueue(Integer value) {
+            try {
+                lock.lock();
+                q.enqueue(value);
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public Integer dequeue() {
+            try {
+                lock.lock();
+                return q.dequeue();
+            } finally {
+                lock.unlock();
+            }
+        }
+    }
+
+    /*
+    PRINTS THE THROUGHPUT WITH NEW LINE AND THAT'S IT
+     */
+    public static void main(String[] args) {
+        assert args.length == 2;
+        int threadsAmount = parseInt(args[0]);
+        int implementation = parseInt(args[0]);
+        final int EXECUTION_TIME_SECS = 10;
+        final MyQueue queue;
+        final boolean[] runThreads = {true};
+        switch (implementation) {
+            case 1:
+                queue = new LockFreeQueue(threadsAmount);
+                break;
+            case 2:
+                queue = new DeadlockFreeQueue();
+                break;
+            default:
+                throw new Error("Invalid implementation arg" + implementation);
+        }
+        final OpsCounterThread[] threads = new OpsCounterThread[threadsAmount];
+        for (int i = 0; i < threads.length; i++) {
+            threads[i] = new OpsCounterThread(runThreads,queue);
+        }
+        for (Thread thread : threads) {
+            thread.start();
+        }
+        try {
+            Thread.sleep(EXECUTION_TIME_SECS * 1000);
+            runThreads[0] = false;
+            for (Thread thread : threads) {
+                thread.join();
+            }
+        } catch (InterruptedException e) {
+            System.err.println("Interrupted: ");
+            e.printStackTrace();
+            exit(1);
+        }
+        double throughput = 0;
+        for (OpsCounterThread thread : threads) {
+            throughput += (thread.getOpsCount()/EXECUTION_TIME_SECS);
+        }
+        System.out.println(throughput);
+    }
+
+    static class OpsCounterThread extends Thread{
+        private long opsCount=0;
+        final boolean[] runThreads;
+        final MyQueue queue;
+
+        public OpsCounterThread(boolean[] runThreads, MyQueue queue) {
+            this.runThreads = runThreads;
+            this.queue = queue;
+        }
+
+        @Override
+        public void run() {
+            Random random = new Random();
+            while (runThreads[0]) {
+                if (this.opsCount % 2 == 0) {
+                    int i = random.nextInt();
+                    queue.enqueue(i);
+                } else {
+                    queue.dequeue();
+                }
+                this.opsCount++;
+            }
+        }
+
+        public long getOpsCount() {
+            return this.opsCount;
+        }
     }
 }
