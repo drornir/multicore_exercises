@@ -1,5 +1,6 @@
 package mpp;
 
+import java.text.Format;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
@@ -81,7 +82,8 @@ public class Ex2q7 {
         }
 
         private int getThreadId() {
-            return (int) Thread.currentThread().getId() & this.head.length;
+            //System.out.print(Thread.currentThread().getId()+"%"+this.head.length);
+            return (int) Thread.currentThread().getId() % this.head.length;
         }
 
         private class OpNode<T> {
@@ -98,6 +100,7 @@ public class Ex2q7 {
 
     interface MyQueue {
         void initInsideThread();
+
         void enqueue(Integer value);
 
         Integer dequeue();
@@ -224,7 +227,7 @@ public class Ex2q7 {
     public static void main(String[] args) {
         assert args.length == 2;
         int threadsAmount = parseInt(args[0]);
-        int implementation = parseInt(args[0]);
+        int implementation = parseInt(args[1]);
         final int EXECUTION_TIME_SECS = 10;
         final MyQueue queue;
         final boolean[] runThreads = {true};
@@ -258,7 +261,7 @@ public class Ex2q7 {
         for (OpsCounterThread thread : threads) {
             throughput += (thread.getOpsCount() / EXECUTION_TIME_SECS);
         }
-        System.out.println(throughput);
+        System.out.println(String.format("%.1f",throughput));
     }
 
     static class OpsCounterThread extends Thread {
