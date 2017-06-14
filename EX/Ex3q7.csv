@@ -1,0 +1,13 @@
+threads,implementation,avg_through
+1,lazy,10862119
+1,lock_free,21311138
+2,lazy,808415
+2,lock_free,5961358
+4,lazy,340046
+4,lock_free,10465266
+8,lazy,267398
+8,lock_free,7864787
+16,lazy,182021
+16,lock_free,9356421
+32,lazy,103605
+32,lock_free,9686444

@@ -1,0 +1,16 @@
+
+Benchmark:
+Idea:
+    We measured the time it took for all threads to advance a shared counter to 1 million.
+    This is because we wanted to simulate a scenario that is similar to the scenario shown in class (The Mystery graphs like in slide 30), where the ideal behaviour is a constant function in regard to amount of threads.
+Consistency:
+    We've ran every test 10 times and measured the average time it took.
+** insert Ex3q8.csv as textual table here **
+** insert Ex3q8.csv as graph here **
+Conclusions:
+    CLH:
+        As expected, we see almost no dependency between amount of threads and time taken. We dismiss the fast performance of the single threaded execution because it could be achieved by synchronous optimizations and because we care very little about lock performance in a single threaded run.
+    Backoff:
+        Unfortunately, we saw no consistent impact of the max value used and any performance increase/decrease. We assume that the time it takes to "sleep" and wake up in the context of a Java program provides enough (random) wait time so contentions are resolved after 1-2 backoffs. It is also possible that a single thread starved almost all the other threads.
+    Comparison:
+        We can see that the Backoff lock performs way better on the specific benchmark that we chose, despite it being theoretically less reliable.

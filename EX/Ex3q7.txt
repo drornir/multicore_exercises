@@ -1,0 +1,2 @@
+** insert Ex3q7.csv as textual table here **
+** insert Ex3q7.csv as graph here **

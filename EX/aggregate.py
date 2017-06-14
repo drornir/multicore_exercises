@@ -3,7 +3,7 @@ import csv
 read_formatted = []
 with open("data.csv", newline='') as csvfile:
     csvreader = csv.reader(csvfile)
-    impl_map = {"1": "lock_free", "2": "dead_lock_free"}
+    impl_map = {"1": "lazy", "2": "lock_free"}
     i = -1
     for row in csvreader:
         i += 1

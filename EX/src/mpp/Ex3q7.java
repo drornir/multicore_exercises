@@ -1,12 +1,80 @@
 package mpp;
 
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicMarkableReference;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class Ex3q7 {
+import static java.lang.Integer.parseInt;
 
-    public static void main(String[] args){
-        //TODO
+public class Ex3q7 {
+    /**
+     * @param args [0] is threads amount, [1] is implementation { "1": lazy, "2": lock free}
+     */
+    public static void main(String[] args) {
+        assert args.length == 2;
+        int threadsAmount = parseInt(args[0]);
+        int implementation = parseInt(args[1]);
+        final int EXECUTION_TIME_SECS = 10;
+        final boolean[] runThreads = {true};
+        final PriorityQueue<Object> queue;
+        switch (implementation) {
+            case 1:
+                queue = new LazyPriorityQueue<>();
+                break;
+            case 2:
+                queue = new LockFreePriorityQueue<>();
+                break;
+            default:
+                throw new Error("Invalid implementation arg" + implementation);
+        }
+        final OpsCounterThread[] threads = new OpsCounterThread[threadsAmount];
+        for (int i = 0; i < threads.length; i++) {
+            threads[i] = new OpsCounterThread(runThreads, queue);
+        }
+        for (Thread thread : threads) {
+            thread.start();
+        }
+        try {
+            Thread.sleep(EXECUTION_TIME_SECS * 1000);
+            runThreads[0] = false;
+            for (Thread thread : threads) {
+                thread.join();
+            }
+        } catch (InterruptedException e) {
+            throw new Error("Interrupted", e);
+        }
+        double throughput = 0;
+        for (OpsCounterThread thread : threads) {
+            throughput += ((double) thread.getOpsCount()) / EXECUTION_TIME_SECS;
+        }
+        System.out.println(String.format("%.1f", throughput));
+    }
+
+    static class OpsCounterThread extends Thread {
+        private long opsCount = 0;
+        final boolean[] runThreads;
+        final PriorityQueue<Object> queue;
+
+        public OpsCounterThread(boolean[] runThreads, PriorityQueue<Object> queue) {
+            this.runThreads = runThreads;
+            this.queue = queue;
+        }
+
+        @Override
+        public void run() {
+            Random random = new Random();
+            while (runThreads[0]) {
+                if (this.opsCount % 2 == 0)
+                    queue.add(new Object(), random.nextInt(Integer.MAX_VALUE / 2));
+                else
+                    queue.removeMin();
+                this.opsCount++;
+            }
+        }
+
+        public long getOpsCount() {
+            return this.opsCount;
+        }
     }
 
     public interface PriorityQueue<T> {
@@ -124,12 +192,12 @@ public class Ex3q7 {
             while (true) {
                 Window window = findMin();
                 LFNode pred = window.pred, curr = window.curr, succ = curr.next.getReference();
-                if(succ == null){//empty list
+                if (succ == null) {//empty list
                     return null;
                 }
                 snip = curr.next.compareAndSet(succ, succ, false, true);
-                if(!snip) continue;
-                pred.next.compareAndSet(curr,succ,false,false);
+                if (!snip) continue;
+                pred.next.compareAndSet(curr, succ, false, false);
                 return curr.item;
             }
         }
